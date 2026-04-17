@@ -722,19 +722,137 @@
     el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   }
 
+  // ─── System prompt (full nursing knowledge added in Stage 3) ───
+  const SYSTEM_PROMPT =
+    'You are NurseForward, a warm and knowledgeable AI career companion for nurses in the UK. ' +
+    'You have deep knowledge of the NHS, Agenda for Change banding (Bands 2–9), nursing specialties, ' +
+    'and the wide range of career options available to nurses — including roles in insurance, legal, ' +
+    'pharmaceutical, health technology, management consultancy, policy, regulation, and education. ' +
+    'Your tone is warm, encouraging, and conversational — like a trusted colleague who happens to know ' +
+    'a great deal about career paths. Never make a nurse feel guilty for exploring options outside ' +
+    'clinical practice. Gather their background naturally through conversation before making suggestions.';
+
+  // ─── Markdown renderer ─────────────────────────────────────────
+  function renderMarkdown(raw) {
+    // Escape HTML
+    let t = raw
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Block elements — process line by line
+    const lines  = t.split('\n');
+    const out    = [];
+    let inUL     = false;
+
+    for (const line of lines) {
+      if (/^## (.+)/.test(line)) {
+        if (inUL) { out.push('</ul>'); inUL = false; }
+        out.push(line.replace(/^## (.+)/, '<h2>$1</h2>'));
+      } else if (/^### (.+)/.test(line)) {
+        if (inUL) { out.push('</ul>'); inUL = false; }
+        out.push(line.replace(/^### (.+)/, '<h3>$1</h3>'));
+      } else if (/^[*-] (.+)/.test(line)) {
+        if (!inUL) { out.push('<ul>'); inUL = true; }
+        out.push(line.replace(/^[*-] (.+)/, '<li>$1</li>'));
+      } else {
+        if (inUL) { out.push('</ul>'); inUL = false; }
+        out.push(line);
+      }
+    }
+    if (inUL) out.push('</ul>');
+
+    // Inline: **bold**, *italic*, `code`
+    let html = out.join('\n')
+      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*\n]+)\*/g,     '<em>$1</em>')
+      .replace(/`([^`\n]+)`/g,       '<code>$1</code>');
+
+    // Wrap plain-text blocks in <p>
+    return html.split(/\n\n+/).map(seg => {
+      seg = seg.trim();
+      if (!seg) return '';
+      if (/^<(h[23]|ul|ol|li)/.test(seg)) return seg;
+      return '<p>' + seg.replace(/\n/g, '<br>') + '</p>';
+    }).filter(Boolean).join('\n');
+  }
+
+  // ─── Core API streaming call ───────────────────────────────────
+  async function streamResponse(messages) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2048,
+        system: SYSTEM_PROMPT,
+        messages,
+        stream: true
+      })
+    });
+
+    if (!res.ok) {
+      let msg = `API error ${res.status}`;
+      try { const j = await res.json(); msg = j.error?.message || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+
+    // Hide typing indicator and create the streaming bubble
+    hideTyping();
+    const bubble = addMessage('assistant', '');
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText  = '';
+    let buf       = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop(); // keep any incomplete line
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const evt = JSON.parse(data);
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+            fullText += evt.delta.text;
+            bubble.innerHTML = renderMarkdown(fullText);
+            scrollToBottom();
+          }
+        } catch (_) {}
+      }
+    }
+
+    // Final render pass once stream is complete
+    bubble.innerHTML = renderMarkdown(fullText);
+    scrollToBottom();
+    return fullText;
+  }
+
   // ─── Conversation ──────────────────────────────────────────────
   async function initiateConversation() {
-    // API call will be wired up in Stage 2.
-    // For now show a placeholder greeting so the UI is testable.
+    const initMsg = { role: 'user', content: '[CONVERSATION_START]' };
+    conversationHistory = [initMsg];
+
     showTyping();
-    await delay(900);
-    hideTyping();
-    addMessage('assistant',
-      '<p>Hi, I\'m really glad you\'re here. I\'m NurseForward — think of me as a friendly career ' +
-      'sounding board who knows the NHS inside out and has a pretty good map of where nursing ' +
-      'skills can take you, including places you might not have thought of.</p>' +
-      '<p>Before we get into anything, I\'d love to hear a bit about you. How long have you been nursing?</p>'
-    );
+    try {
+      const reply = await streamResponse([initMsg]);
+      conversationHistory.push({ role: 'assistant', content: reply });
+    } catch (e) {
+      hideTyping();
+      showError('Could not connect: ' + e.message);
+    }
   }
 
   async function sendMessage() {
@@ -746,24 +864,26 @@
 
     inputEl.value = '';
     autoResize(inputEl);
-
     addMessage('user', text);
     conversationHistory.push({ role: 'user', content: text });
 
-    // API call will be wired in Stage 2
-    // Stub response so the UI is exercisable now
     isStreaming = true;
     document.getElementById('send-btn').disabled = true;
+    inputEl.disabled = true;
+
     showTyping();
-    await delay(800);
-    hideTyping();
-    addMessage('assistant',
-      '<p>Thanks for sharing that — it really helps me build a picture. ' +
-      '(Full AI responses will be connected in Stage 2.)</p>'
-    );
-    isStreaming = false;
-    document.getElementById('send-btn').disabled = false;
-    inputEl.focus();
+    try {
+      const reply = await streamResponse([...conversationHistory]);
+      conversationHistory.push({ role: 'assistant', content: reply });
+    } catch (e) {
+      hideTyping();
+      showError('Something went wrong: ' + e.message);
+    } finally {
+      isStreaming = false;
+      document.getElementById('send-btn').disabled = false;
+      inputEl.disabled = false;
+      inputEl.focus();
+    }
   }
 
   function resetSession() {
@@ -772,8 +892,6 @@
     document.getElementById('messages-inner').innerHTML = '';
     initiateConversation();
   }
-
-  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 
 </body>
