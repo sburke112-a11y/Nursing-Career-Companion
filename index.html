@@ -495,7 +495,115 @@
       font-family: ui-monospace, monospace;
     }
 
-    /* Responsive */
+    /* ─── Tab bar ─────────────────────────────────────────────── */
+    .tab-bar {
+      background: white;
+      border-bottom: 1px solid var(--warm-200);
+      display: flex;
+      padding: 0 1rem;
+      flex-shrink: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-bar::-webkit-scrollbar { display: none; }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0 0.875rem;
+      height: 44px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--gray-500);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .tab:hover:not(.locked) { color: var(--teal-700); }
+
+    .tab.active {
+      color: var(--teal-700);
+      border-bottom-color: var(--teal-600);
+    }
+
+    .tab.locked {
+      color: var(--gray-400);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .tab svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ─── Tab panels ─────────────────────────────────────────── */
+    .tab-panels {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tab-panel.active { display: flex; }
+
+    /* ─── Locked state ───────────────────────────────────────── */
+    .locked-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      gap: 0.625rem;
+    }
+
+    .lock-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--warm-100);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .lock-icon svg { width: 22px; height: 22px; color: var(--gray-400); }
+
+    .locked-state h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .locked-state p {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      max-width: 340px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .locked-state .unlock-hint {
+      font-size: 0.8125rem;
+      color: var(--teal-600);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
     @media (max-width: 600px) {
       .app-header    { padding: 0 1rem; }
       #messages-container { padding: 1.25rem 1rem 0.75rem; }
@@ -571,33 +679,112 @@
     <button class="header-btn" onclick="resetSession()">New conversation</button>
   </header>
 
-  <div id="messages-container">
-    <div class="messages-inner" id="messages-inner">
-      <!-- Messages injected here by JS -->
-    </div>
-  </div>
+  <!-- Tab bar -->
+  <nav class="tab-bar">
+    <button class="tab active" id="tab-chat" onclick="switchTab('chat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat
+    </button>
+    <button class="tab locked" id="tab-cv" onclick="switchTab('cv')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      CV Builder
+    </button>
+    <button class="tab locked" id="tab-statement" onclick="switchTab('statement')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Personal Statement
+    </button>
+    <button class="tab locked" id="tab-jobs" onclick="switchTab('jobs')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Job Board
+    </button>
+    <button class="tab locked" id="tab-planner" onclick="switchTab('planner')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Career Planner
+    </button>
+  </nav>
 
-  <div class="input-area">
-    <div class="input-row">
-      <div class="textarea-wrap">
-        <textarea
-          id="user-input"
-          rows="1"
-          placeholder="Type your message…"
-          onkeydown="handleKeyDown(event)"
-          oninput="autoResize(this)"
-        ></textarea>
+  <!-- Tab panels -->
+  <div class="tab-panels">
+
+    <!-- Chat panel -->
+    <div class="tab-panel active" id="panel-chat">
+      <div id="messages-container">
+        <div class="messages-inner" id="messages-inner">
+          <!-- Messages injected here by JS -->
+        </div>
       </div>
-      <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send (Enter)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
+      <div class="input-area">
+        <div class="input-row">
+          <div class="textarea-wrap">
+            <textarea
+              id="user-input"
+              rows="1"
+              placeholder="Type your message…"
+              onkeydown="handleKeyDown(event)"
+              oninput="autoResize(this)"
+            ></textarea>
+          </div>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send (Enter)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <p class="input-hint">Enter to send &nbsp;·&nbsp; Shift + Enter for a new line</p>
+      </div>
     </div>
-    <p class="input-hint">Enter to send &nbsp;·&nbsp; Shift + Enter for a new line</p>
-  </div>
+
+    <!-- CV Builder panel -->
+    <div class="tab-panel" id="panel-cv">
+      <div class="locked-state" id="cv-locked">
+        <div class="lock-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>CV Builder</h3>
+        <p>Once you've shared your background and received career suggestions in Chat, I'll help you build a professional CV — with versions tailored for NHS applications and commercial roles.</p>
+        <p class="unlock-hint">Finish your Chat conversation to unlock this.</p>
+      </div>
+    </div>
+
+    <!-- Personal Statement panel -->
+    <div class="tab-panel" id="panel-statement">
+      <div class="locked-state" id="statement-locked">
+        <div class="lock-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Personal Statement</h3>
+        <p>Paste in any job description and I'll generate a tailored personal statement and cover letter based on your profile — with honest feedback on how well you fit the role.</p>
+        <p class="unlock-hint">Finish your Chat conversation to unlock this.</p>
+      </div>
+    </div>
+
+    <!-- Job Board panel -->
+    <div class="tab-panel" id="panel-jobs">
+      <div class="locked-state" id="jobs-locked">
+        <div class="lock-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Job Board</h3>
+        <p>A curated directory of job boards and employer portals across NHS, private healthcare, insurance, health tech, consultancy, policy, and more — personalised to your career interests.</p>
+        <p class="unlock-hint">Finish your Chat conversation to unlock this.</p>
+      </div>
+    </div>
+
+    <!-- Career Planner panel -->
+    <div class="tab-panel" id="panel-planner">
+      <div class="locked-state" id="planner-locked">
+        <div class="lock-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Career Planner</h3>
+        <p>Based on your current role and aspirations, I'll map out realistic 2 and 5 year career paths — showing what qualifications, experience, and steps are needed to get there.</p>
+        <p class="unlock-hint">Finish your Chat conversation to unlock this.</p>
+      </div>
+    </div>
+
+  </div><!-- /tab-panels -->
 
 </div>
 
@@ -606,6 +793,51 @@
   let apiKey = '';
   let conversationHistory = [];
   let isStreaming = false;
+
+  // ─── User profile ─────────────────────────────────────────────
+  const userProfile = {
+    name: null, band: null, specialty: null,
+    yearsExperience: null, currentRole: null,
+    careerInterests: [], hasCareerSuggestions: false
+  };
+
+  function profileUnlocked() {
+    return !!(userProfile.band && userProfile.specialty &&
+              userProfile.yearsExperience && userProfile.hasCareerSuggestions);
+  }
+
+  function updateTabStates() {
+    const unlocked = profileUnlocked();
+    ['cv', 'statement', 'jobs', 'planner'].forEach(id => {
+      const tab = document.getElementById(`tab-${id}`);
+      if (tab) tab.classList.toggle('locked', !unlocked);
+    });
+  }
+
+  function switchTab(id) {
+    if (id !== 'chat' && !profileUnlocked()) return;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`tab-${id}`).classList.add('active');
+    document.getElementById(`panel-${id}`).classList.add('active');
+  }
+
+  function extractProfileUpdate(text) {
+    const match = text.match(/<!--\s*NF_PROFILE:\s*(\{[\s\S]*?\})\s*-->/);
+    if (!match) return text;
+    try {
+      const update = JSON.parse(match[1]);
+      Object.keys(update).forEach(key => {
+        if (key === 'careerInterests' && Array.isArray(update[key])) {
+          userProfile.careerInterests = [...new Set([...userProfile.careerInterests, ...update[key]])];
+        } else {
+          userProfile[key] = update[key];
+        }
+      });
+      updateTabStates();
+    } catch (_) {}
+    return text.replace(/<!--\s*NF_PROFILE:[\s\S]*?-->/g, '').trim();
+  }
 
   // ─── Init: restore saved key ──────────────────────────────────
   (function restoreKey() {
@@ -795,7 +1027,24 @@ When you receive [CONVERSATION_START], open with a warm, personal greeting and a
 
 TONE: Warm, human, and direct. Like a trusted colleague who knows a great deal about careers — not a careers advisor reading from a pamphlet. Use contractions. Ask follow-up questions. Acknowledge emotions. Never make someone feel they are abandoning nursing by exploring options.
 
-FORMAT: Use conversational paragraphs while gathering background information. When presenting career options, use clear structure with bold role names and a short paragraph for each. Keep responses focused — a clear paragraph is better than a long essay.`;
+FORMAT: Use conversational paragraphs while gathering background information. When presenting career options, use clear structure with bold role names and a short paragraph for each. Keep responses focused — a clear paragraph is better than a long essay.
+
+PROFILE EXTRACTION:
+The app has additional tabs (CV Builder, Personal Statement, Job Board, Career Planner) that unlock once you have gathered enough of the nurse's background. As you learn information during the conversation, include a hidden profile update at the very end of your response in this exact format — the nurse never sees it, it is processed silently by the app:
+<!-- NF_PROFILE: {"field": "value"} -->
+
+Available fields:
+- "name": string — first name if volunteered
+- "band": string — AfC band e.g. "6"
+- "specialty": string — clinical area e.g. "Emergency"
+- "yearsExperience": number — years of nursing
+- "currentRole": string — current job title
+- "careerInterests": array — sectors they express interest in, chosen from: ["insurance","legal","pharma","health_tech","consultancy","policy","education","charity","occupational_health","private_sector","international","nhs_non_clinical"]
+- "hasCareerSuggestions": boolean — set to true only after you have presented a full set of career suggestions
+
+Only include fields you have just confirmed. Example: <!-- NF_PROFILE: {"band": "7", "specialty": "ICU", "yearsExperience": 12} -->
+
+After presenting career suggestions, set hasCareerSuggestions to true and naturally continue the conversation by offering to help build their CV and use the other tools. Let them know the other tabs have now unlocked. Then offer to gather more detail: their full name (for the CV), a brief employment history starting from their current role, qualifications and education, and any key achievements or skills. Gather this over several natural exchanges — not as a form.`;
 
   // ─── Markdown renderer ─────────────────────────────────────────
   function renderMarkdown(raw) {
@@ -899,7 +1148,8 @@ FORMAT: Use conversational paragraphs while gathering background information. Wh
       }
     }
 
-    // Final render pass once stream is complete
+    // Strip hidden profile tags, update state, then final render
+    fullText = extractProfileUpdate(fullText);
     bubble.innerHTML = renderMarkdown(fullText);
     scrollToBottom();
     return fullText;
