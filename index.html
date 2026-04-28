@@ -739,6 +739,39 @@
       padding: 1rem 0;
     }
 
+    /* Job board directory */
+    .directory-section { margin-top: 2rem; }
+
+    .dir-heading {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 0.875rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--warm-200);
+    }
+
+    .dir-card {
+      background: white;
+      border: 1px solid var(--warm-200);
+      border-radius: 0.75rem;
+      padding: 0.875rem 1rem;
+      margin-bottom: 0.625rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .dir-card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--teal-700);
+      margin-bottom: 0.375rem;
+    }
+
+    .dir-card ul { padding-left: 1.125rem; margin: 0; }
+    .dir-card li { font-size: 0.8375rem; color: var(--gray-600); margin-bottom: 0.25rem; line-height: 1.55; }
+    .dir-card a  { color: var(--teal-600); text-decoration: none; }
+    .dir-card a:hover { text-decoration: underline; }
+
     /* ─── Responsive ─────────────────────────────────────────── */
     @media (max-width: 600px) {
       .app-header    { padding: 0 1rem; }
@@ -947,6 +980,78 @@
         <p>A curated directory of job boards and employer portals across NHS, private healthcare, insurance, health tech, consultancy, policy, and more — personalised to your career interests.</p>
         <p class="unlock-hint">Finish your Chat conversation to unlock this.</p>
       </div>
+      <div class="panel-scroll" id="jobs-content-area" style="display:none">
+        <div class="panel-inner">
+          <div class="panel-heading">
+            <h2>Job Board</h2>
+            <p>Get a personalised search guide based on your profile, or browse the full directory below by sector.</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn-teal" onclick="generateJobBoard()" id="btn-gen-jobs">Personalise my job search</button>
+            <span class="copy-success" id="jobs-copy-msg">Copied!</span>
+          </div>
+          <div id="jobs-generating" class="generating-msg" style="display:none">Preparing your personalised guide…</div>
+          <div class="output-box" id="jobs-output-box" style="display:none"></div>
+          <div class="btn-row" id="jobs-action-bar" style="display:none">
+            <button class="btn-secondary" onclick="copyOutput('jobs-output-box','jobs-copy-msg')">Copy guide</button>
+          </div>
+
+          <div class="directory-section">
+            <h3 class="dir-heading">Full Directory</h3>
+
+            <div class="dir-card">
+              <div class="dir-card-title">NHS &amp; Public Sector</div>
+              <ul><li><a href="https://www.jobs.nhs.uk" target="_blank" rel="noopener">NHS Jobs</a> — the main portal for all NHS England roles</li><li>NHS Scotland Jobs (jobs.scot.nhs.uk), HSC Recruit for Northern Ireland</li><li><a href="https://www.civilservicejobs.service.gov.uk" target="_blank" rel="noopener">Civil Service Jobs</a> — DHSC, NHSE, UKHSA, and policy roles</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Private &amp; Independent Healthcare</div>
+              <ul><li>Nuffield Health, Spire Healthcare, HCA Healthcare UK, BMI Healthcare — search each company's careers page directly</li><li><a href="https://www.reed.co.uk" target="_blank" rel="noopener">Reed Healthcare</a> and <a href="https://www.hays.co.uk" target="_blank" rel="noopener">Hays Healthcare</a> — large agencies covering NHS and private</li><li>NHS Professionals — bank and flexible staffing</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Insurance &amp; Financial Services</div>
+              <ul><li>Aviva, Bupa, AXA Health, Vitality, Canada Life, Legal &amp; General — search each company's careers page for clinical case manager, medical underwriter, or rehabilitation roles</li><li><a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a> — filter by "clinical case manager" or "medical advisor" + insurer name</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Legal &amp; Medico-legal</div>
+              <ul><li>MDU (the-mdu.com), MPS, MDDUS — all recruit experienced nurses for case review and advisory roles; careers sections on their main sites</li><li>Irwin Mitchell, Leigh Day, Clyde &amp; Co — clinical negligence teams; search their careers pages</li><li><a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a> — search "legal nurse consultant" or "clinical negligence reviewer"</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Pharmaceutical, Devices &amp; Clinical Research</div>
+              <ul><li>ICON, Parexel, IQVIA, PPD — CRO careers pages for CRA and trial coordinator roles</li><li>NIHR — nihr.ac.uk/careers for research nurse roles within NHS Trusts</li><li>ABPI member company careers pages for MSL and HCP educator roles</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Health Technology &amp; Digital</div>
+              <ul><li>NHS England Digital — jobs.nhs.uk (filter digital/informatics)</li><li>Accurx, Dovetail Lab, Lantum, Cera Care — search their company sites</li><li><a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a> — search "clinical informaticist" or "EPR implementation" + your region</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Management Consultancy</div>
+              <ul><li>Newton Europe, Carnall Farrar, Baringa, PA Consulting — specialist health consultancies; apply via their sites</li><li>Deloitte, KPMG, PwC — NHS/health practice; use their main careers portals</li><li><a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a> — search "healthcare consultant" + consultancy name</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Policy, Regulation &amp; Government</div>
+              <ul><li><a href="https://www.civilservicejobs.service.gov.uk" target="_blank" rel="noopener">Civil Service Jobs</a> — DHSC policy, NHS England, UKHSA</li><li>CQC — cqc.org.uk/about-us/jobs for inspector and advisor roles</li><li>NICE — nice.org.uk/about/jobs</li><li>NHS Confederation (nhsconfed.org) for senior policy and network roles</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Charity &amp; Third Sector</div>
+              <ul><li><a href="https://www.charityjob.co.uk" target="_blank" rel="noopener">Charity Jobs</a> — largest UK charity jobs board; filter by health</li><li><a href="https://jobs.theguardian.com" target="_blank" rel="noopener">Guardian Jobs</a> — strong charity and public sector listings</li><li>Macmillan, Marie Curie, Mind, Stroke Association — search each charity's careers page directly</li></ul>
+            </div>
+
+            <div class="dir-card">
+              <div class="dir-card-title">Education &amp; Academia</div>
+              <ul><li><a href="https://www.jobs.ac.uk" target="_blank" rel="noopener">jobs.ac.uk</a> — all UK university nursing lecturer and academic roles</li><li>NHS Jobs — simulation and practice development posts</li></ul>
+            </div>
+
+          </div><!-- /directory-section -->
+        </div>
+      </div>
     </div>
 
     <!-- Career Planner panel -->
@@ -958,6 +1063,24 @@
         <h3>Career Planner</h3>
         <p>Based on your current role and aspirations, I'll map out realistic 2 and 5 year career paths — showing what qualifications, experience, and steps are needed to get there.</p>
         <p class="unlock-hint">Finish your Chat conversation to unlock this.</p>
+      </div>
+      <div class="panel-scroll" id="planner-content-area" style="display:none">
+        <div class="panel-inner">
+          <div class="panel-heading">
+            <h2>Career Planner</h2>
+            <p>Based on everything we've discussed, I'll map out 2–3 realistic paths — each with concrete steps, likely timelines, and what you'd need to get there.</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn-teal" onclick="generateCareerPlan()" id="btn-gen-plan">Generate my career plan</button>
+          </div>
+          <div id="planner-generating" class="generating-msg" style="display:none">Mapping your career paths…</div>
+          <div class="btn-row" id="planner-action-bar" style="display:none">
+            <button class="btn-secondary" onclick="copyOutput('planner-output-box','plan-copy-msg')">Copy to clipboard</button>
+            <button class="btn-secondary" onclick="generateCareerPlan()">Regenerate</button>
+            <span class="copy-success" id="plan-copy-msg">Copied!</span>
+          </div>
+          <div class="output-box" id="planner-output-box" style="display:none"></div>
+        </div>
       </div>
     </div>
 
@@ -992,10 +1115,10 @@
       if (lockedEl) lockedEl.style.display = unlocked ? 'none' : '';
     });
     if (unlocked) {
-      const cvArea  = document.getElementById('cv-content-area');
-      const stmtArea = document.getElementById('statement-content-area');
-      if (cvArea)   cvArea.style.display   = '';
-      if (stmtArea) stmtArea.style.display = '';
+      ['cv-content-area','statement-content-area','jobs-content-area','planner-content-area'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+      });
     }
   }
 
@@ -1082,6 +1205,64 @@ Use [placeholder in square brackets] wherever you need information not yet provi
       msg.classList.add('show');
       setTimeout(() => msg.classList.remove('show'), 2000);
     });
+  }
+
+  // ─── Job Board ────────────────────────────────────────────────
+  async function generateJobBoard() {
+    const prompt = `Based on our conversation, write a concise personalised job search guide for this nurse (no more than 300 words). Cover: which 2–3 sectors from the directory below are the best fit for their specific background and goals, why those sectors suit them in particular, any specific role titles they should search for, and one or two practical first steps. Be direct and specific — not generic. Do not include the NF_PROFILE comment in this response.`;
+
+    const btn    = document.getElementById('btn-gen-jobs');
+    const genMsg = document.getElementById('jobs-generating');
+    const output = document.getElementById('jobs-output-box');
+    const bar    = document.getElementById('jobs-action-bar');
+
+    if (btn) btn.disabled = true;
+    genMsg.style.display = '';
+    output.style.display = 'none';
+    if (bar) bar.style.display = 'none';
+
+    try {
+      const messages = [...conversationHistory, { role: 'user', content: prompt }];
+      const text = await fetchPlain(messages);
+      output.innerHTML = renderMarkdown(text);
+      output.style.display = '';
+      if (bar) bar.style.display = '';
+    } catch (e) {
+      output.innerHTML = '<p style="color:#dc2626">Failed to generate — please try again.</p>';
+      output.style.display = '';
+    } finally {
+      genMsg.style.display = 'none';
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  // ─── Career Planner ───────────────────────────────────────────
+  async function generateCareerPlan() {
+    const prompt = `Based on our conversation, create a career plan for this nurse with 2–3 distinct paths. For each path include: a short name (e.g. "Clinical progression", "Move into consultancy", "Transition to health tech"), where they are now vs where this leads, the key steps in the next 2 years, the 5-year goal, any qualifications or experience needed, and a realistic difficulty rating (straightforward / moderate / significant shift). Be specific to their actual background — not generic. Do not include the NF_PROFILE comment in this response.`;
+
+    const btn    = document.getElementById('btn-gen-plan');
+    const genMsg = document.getElementById('planner-generating');
+    const output = document.getElementById('planner-output-box');
+    const bar    = document.getElementById('planner-action-bar');
+
+    if (btn) btn.disabled = true;
+    genMsg.style.display = '';
+    output.style.display = 'none';
+    if (bar) bar.style.display = 'none';
+
+    try {
+      const messages = [...conversationHistory, { role: 'user', content: prompt }];
+      const text = await fetchPlain(messages);
+      output.innerHTML = renderMarkdown(text);
+      output.style.display = '';
+      if (bar) bar.style.display = '';
+    } catch (e) {
+      output.innerHTML = '<p style="color:#dc2626">Failed to generate — please try again.</p>';
+      output.style.display = '';
+    } finally {
+      genMsg.style.display = 'none';
+      if (btn) btn.disabled = false;
+    }
   }
 
   // ─── Plain (non-streamed) API call for tab generation ─────────
